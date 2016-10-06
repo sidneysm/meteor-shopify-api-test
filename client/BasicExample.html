@@ -1,0 +1,31 @@
+<head>
+  <title>BasicExample</title>
+</head>
+
+<body>
+  {{> BasicExample}}
+</body>
+
+<template name="BasicExample">
+  <div class="label-container">
+    <label id="shop-label">Your Shop</label>
+    <input type="text" id="shop" value="sidney-store"/>
+    <span class="shop-helper">.myshopify.com</span>
+  </div>
+  <button id="login">Login via Shopify</button>
+
+
+  <p>{{error}}</p>
+  <p>{{orderCount}}</p>
+
+   <h1>Top Selling</h1>
+   <ul>
+       {{#each best_selling}}
+            <li>{{name}}</li>
+            <ul>
+                <li>Quantity: {{quantity}}</li>
+            </ul>
+       {{/each}}
+   </ul>
+
+</template>
