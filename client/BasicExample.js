@@ -18,8 +18,8 @@ Template.BasicExample.helpers({
         return "";
     },
     best_selling: function() {
+        //get the ranked products from de Session
         var products = Session.get('rank');
-        console.log(products);
         return products
     }
 });
@@ -118,48 +118,49 @@ function makeAPI() {
     //Getting Orders from the last delay
     //creat last day data-target
     y = new Date();
-    y.setDate(y.getDate() - 2);
+    y.setDate(y.getDate() - 1);
     const products = [];
 
 
 
-    //Getting all Orders of the last day
+    //Getting all Orders of the last day, but just the field 'line_items'
     var orders = api.getAllOrders({ status: "any", processed_at_min: y, fields: "line_items" }, function(err, orders){
         if (err) {
             console.log("Errors: ", err);
         } else {
-            console.log(orders);
+            //For each order I get each item
             orders.map(function(order){
-                //console.log(order.line_items);
                 order.line_items.map(function(item){
                     let { name, product_id, quantity} = item;
                     let product = {name, product_id, quantity}
-                    products.push(product)
+                    products.push(product) //add each item in a array 'products'
                 })
             })
 
+            //create a array for product which will be ranked
             product_rank = [];
             product_copy = Object.assign([], products);
 
             products.map(function(prod_a, i){
                 let add = true;
                 products.map(function(prod_b, j){
-                    if (prod_a.product_id === prod_b.product_id){
-                        if (i !== j) {
-                            console.log('diferents');
-                            prod_a.quantity += prod_b.quantity;
+                    if (prod_a.product_id === prod_b.product_id){ //test if is the same product
+                        if (i !== j) { //test is the same product and index of array
+                            prod_a.quantity += prod_b.quantity; //if they are the same product just sum the quantities
                         }
                     }
                 });
                 product_rank.map(function(p){
-                    if (prod_a.product_id === p.product_id ){
+                    if (prod_a.product_id === p.product_id ){ //if the product alread added, mark as false to not add again
                         add = false
                     }
                 })
                 if (add){
-                    product_rank.push(prod_a);
+                    product_rank.push(prod_a); //add product if is not added before
                 }
             });
+
+            //this function do the sort in desc, by quantity
             product_rank.sort(function(a, b){
                 if (a.quantity > b.quantity) {
                     return -1;
@@ -170,7 +171,9 @@ function makeAPI() {
                 // a must be equal to b
                 return 0;
             })
-            console.log(product_rank);
+
+            /**if there are more less then 10 items add all array,
+            if there are more then 10, splice for get just 10 products and add in the Session **/
             if (product_rank.length > 10)
                 Session.set('rank', product_rank.slice(0, 10))
             else{
